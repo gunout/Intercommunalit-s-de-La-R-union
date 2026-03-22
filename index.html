@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>La Réunion - Hiérarchie des Intercommunalités | CIREST, CINOR, TCO, CASUD, CIVIS</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #eef2f7 0%, #d9e2ec 100%);
+            color: #1e2a3a;
+            padding: 2rem 1.5rem;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* header */
+        .hero {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        .hero h1 {
+            font-size: 2.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e4b2e, #2c7a4a);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .hero h1 i {
+            background: none;
+            color: #2c7a4a;
+            font-size: 2rem;
+        }
+        .hero .sub {
+            color: #2c3e44;
+            font-weight: 500;
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+            background: rgba(255,255,240,0.6);
+            display: inline-block;
+            padding: 0.3rem 1.2rem;
+            border-radius: 40px;
+            backdrop-filter: blur(2px);
+        }
+
+        /* diagram card (mermaid fallback but we build a clean flex hierarchy) */
+        .diagram-card {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2);
+            padding: 2rem 1.5rem;
+            margin-bottom: 2rem;
+            transition: all 0.2s;
+        }
+
+        .hierarchy-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            border-left: 6px solid #2c7a4a;
+            padding-left: 1rem;
+            margin-bottom: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* structure visuelle hiérarchique */
+        .org-tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .region-node {
+            background: linear-gradient(115deg, #1f5e3c, #1e4620);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            box-shadow: 0 12px 18px -8px rgba(0,0,0,0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .connector-line {
+            font-size: 2rem;
+            color: #4b6a3b;
+            margin: 8px 0;
+        }
+        .epci-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1.5rem 0 0.5rem;
+        }
+        .epci-card {
+            background: #fefcf5;
+            border-radius: 1.5rem;
+            width: 200px;
+            padding: 1rem 0.8rem;
+            text-align: center;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            border: 1px solid #e2e8e6;
+        }
+        .epci-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -12px rgba(0,0,0,0.15);
+            border-color: #cbdcd0;
+        }
+        .epci-acronym {
+            font-weight: 800;
+            font-size: 1.4rem;
+            background: #1e2f2a;
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            color: white;
+            margin-bottom: 0.6rem;
+            letter-spacing: 0.5px;
+        }
+        .epci-name {
+            font-weight: 600;
+            margin: 0.5rem 0 0.2rem;
+            color: #1f4f2d;
+        }
+        .epci-communes {
+            font-size: 0.75rem;
+            color: #4b5f5a;
+            background: #eef3ea;
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+        }
+        .highlight-cirest {
+            background: #fef3d6;
+            border: 2px solid #e6a017;
+            box-shadow: 0 12px 20px -10px rgba(230,160,23,0.2);
+        }
+        .highlight-cirest .epci-acronym {
+            background: #b4621a;
+        }
+
+        /* section focus CIREST */
+        .focus-section {
+            background: #fffaf0;
+            border-radius: 1.8rem;
+            margin-top: 1rem;
+            padding: 1.5rem;
+            border-left: 8px solid #e6a017;
+        }
+        .focus-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ad5e1a;
+            margin-bottom: 1.2rem;
+        }
+        .communes-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin: 1rem 0 1.2rem;
+        }
+        .commune-badge {
+            background: white;
+            border-radius: 40px;
+            padding: 0.3rem 1rem;
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #ffe1aa;
+        }
+        .competence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px,1fr));
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+        .competence-item {
+            background: #fef8e7;
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        .competence-item i {
+            color: #e6a017;
+            width: 1.6rem;
+        }
+
+        .table-comparison {
+            overflow-x: auto;
+            margin: 1.8rem 0;
+        }
+        .comp-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 1.2rem;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .comp-table th {
+            background: #2b5e3b;
+            color: white;
+            padding: 12px 8px;
+            font-weight: 600;
+        }
+        .comp-table td, .comp-table th {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e2ede5;
+            text-align: left;
+        }
+        .comp-table tr:last-child td {
+            border-bottom: none;
+        }
+        .comp-table td:first-child, .comp-table th:first-child { padding-left: 1rem; }
+        
+        .sar-note {
+            background: #eaf4e8;
+            padding: 1.2rem 1.5rem;
+            border-radius: 1.2rem;
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #4f6f5e;
+            border-top: 1px solid #cbdcd0;
+            padding-top: 1.5rem;
+        }
+        @media (max-width: 750px) {
+            body { padding: 1rem; }
+            .epci-card { width: 160px; }
+            .hero h1 { font-size: 1.7rem; }
+            .region-node { font-size: 1rem; padding: 0.6rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <h1>
+            <i class="fas fa-map-marked-alt"></i> 
+            Intercommunalités de La Réunion
+        </h1>
+        <div class="sub">Hiérarchie & organisation territoriale · Focus sur la CIREST (Est)</div>
+    </div>
+
+    <!-- DIAGRAMME HIERARCHIQUE PRINCIPAL -->
+    <div class="diagram-card">
+        <div class="hierarchy-title">
+            <i class="fas fa-sitemap"></i> 
+            Structure : Région / Département → EPCI à fiscalité propre
+        </div>
+        <div class="org-tree">
+            <div class="region-node">
+                <i class="fas fa-mountain"></i> RÉGION RÉUNION & DÉPARTEMENT (collectivité unique)
+            </div>
+            <div class="connector-line"><i class="fas fa-angle-double-down"></i></div>
+            <div class="epci-grid">
+                <!-- CINOR -->
+                <div class="epci-card">
+                    <div class="epci-acronym">CINOR</div>
+                    <div class="epci-name">Communauté intercommunale du Nord</div>
+                    <div class="epci-communes">3 communes · Saint-Denis (siège)</div>
+                    <div style="font-size:0.7rem; margin-top:6px;">Nord de l'île</div>
+                </div>
+                <!-- CIREST (highlight) -->
+                <div class="epci-card highlight-cirest">
+                    <div class="epci-acronym">CIREST</div>
+                    <div class="epci-name">Communauté intercommunale Réunion Est</div>
+                    <div class="epci-communes">6 communes · Saint-Benoît (siège)</div>
+                    <div style="font-size:0.7rem; margin-top:6px;"><i class="fas fa-star" style="color:#e6a017;"></i> Est sauvage & cirques</div>
+                </div>
+                <!-- TCO -->
+                <div class="epci-card">
+                    <div class="epci-acronym">TCO</div>
+                    <div class="epci-name">Territoire de la Côte Ouest</div>
+                    <div class="epci-communes">5 communes · Le Port (siège)</div>
+                </div>
+                <!-- CASUD -->
+                <div class="epci-card">
+                    <div class="epci-acronym">CASUD</div>
+                    <div class="epci-name">Communauté d'agglomération du Sud</div>
+                    <div class="epci-communes">4 communes · Le Tampon (siège)</div>
+                </div>
+                <!-- CIVIS -->
+                <div class="epci-card">
+                    <div class="epci-acronym">CIVIS</div>
+                    <div class="epci-name">Communauté intercommunale des Villes solidaires</div>
+                    <div class="epci-communes">6 communes · Saint-Pierre (siège)</div>
+                </div>
+            </div>
+            <div style="margin-top: 1.2rem; font-size: 0.8rem; background: #f2f6f0; padding: 0.4rem 1rem; border-radius: 30px;">
+                <i class="fas fa-chart-line"></i> 5 Établissements Publics de Coopération Intercommunale (EPCI) — Statut : Communautés d’agglomération
+            </div>
+        </div>
+    </div>
+
+    <!-- FOCUS DÉTAILLÉ SUR LA CIREST -->
+    <div class="focus-section">
+        <div class="focus-header">
+            <i class="fas fa-water" style="font-size: 1.9rem;"></i> 
+            <span>CIREST – Communauté intercommunale Réunion Est</span>
+            <span style="font-size: 0.9rem; background:#f4d4a0; padding: 3px 12px; border-radius: 50px;">Siège : Saint-Benoît</span>
+        </div>
+        <p><strong>La CIREST</strong> est la plus vaste intercommunalité de l’île en superficie. Créée en 2001, elle regroupe six communes de l’Est réunionnais, entre océan et forêts tropicales.</p>
+        
+        <div class="communes-list">
+            <span class="commune-badge"><i class="fas fa-city"></i> Saint-Benoît</span>
+            <span class="commune-badge"><i class="fas fa-city"></i> Bras-Panon</span>
+            <span class="commune-badge"><i class="fas fa-city"></i> La Plaine-des-Palmistes</span>
+            <span class="commune-badge"><i class="fas fa-city"></i> Saint-André</span>
+            <span class="commune-badge"><i class="fas fa-city"></i> Sainte-Rose</span>
+            <span class="commune-badge"><i class="fas fa-city"></i> Salazie</span>
+        </div>
+
+        <div style="font-weight: 600; margin: 0.5rem 0 0.2rem;"><i class="fas fa-tasks"></i> Compétences clés exercées par la CIREST :</div>
+        <div class="competence-grid">
+            <div class="competence-item"><i class="fas fa-chart-line"></i> Développement économique (zones d’activités, pôle technologique)</div>
+            <div class="competence-item"><i class="fas fa-draw-polygon"></i> Aménagement de l’espace / SCOT / PLUi</div>
+            <div class="competence-item"><i class="fas fa-trash-alt"></i> Gestion des déchets (syndicat SYDNE avec CINOR)</div>
+            <div class="competence-item"><i class="fas fa-umbrella-beach"></i> Tourisme – Office de tourisme "Côté Est"</div>
+            <div class="competence-item"><i class="fas fa-leaf"></i> Environnement & transition écologique (cours d’eau, forêts)</div>
+            <div class="competence-item"><i class="fas fa-road"></i> Voirie d’intérêt communautaire & mobilités douces</div>
+        </div>
+        <div style="margin-top: 1rem; background: #fff1df; border-radius: 1rem; padding: 0.6rem 1rem; font-size:0.85rem">
+            <i class="fas fa-handshake"></i> <strong>Coopération :</strong> La CIREST gère avec la CINOR le syndicat mixte SYDNE (traitement et valorisation des déchets). Elle porte également le contrat de baie de l’Est et participe aux politiques régionales de gestion du risque cyclonique.
+        </div>
+    </div>
+
+    <!-- TABLEAU COMPARATIF DES 5 INTERCOMMUNALITÉS -->
+    <div class="diagram-card" style="margin-top: 1.2rem;">
+        <div class="hierarchy-title">
+            <i class="fas fa-table-list"></i> 
+            Panorama des 5 intercommunalités réunionnaises
+        </div>
+        <div class="table-comparison">
+            <table class="comp-table">
+                <thead>
+                    <tr><th>EPCI</th><th>Nom complet</th><th>Siège</th><th>Nb communes</th><th>Spécificité</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td style="font-weight:700;">CINOR</td><td>Communauté intercommunale du Nord de La Réunion</td><td>Saint-Denis</td><td>3</td><td>Cœur économique, aéroport Roland Garros, technopole</td></tr>
+                    <tr style="background:#fff6ea;"><td style="font-weight:700; color:#b4621a;">CIREST</td><td>Communauté intercommunale Réunion Est</td><td>Saint-Benoît</td><td>6</td><td>Grande diversité naturelle (Salazie, forêt de l’Est, rivières)</td></tr>
+                    <tr><td style="font-weight:700;">TCO</td><td>Territoire de la Côte Ouest</td><td>Le Port</td><td>5</td><td>Pôle portuaire, zone industrialo-portuaire, littoral dynamique</td></tr>
+                    <tr><td style="font-weight:700;">CASUD</td><td>Communauté d’agglomération du Sud</td><td>Le Tampon</td><td>4</td><td>Terres agricoles des hauts, expansion urbaine</td></tr>
+                    <tr><td style="font-weight:700;">CIVIS</td><td>Communauté intercommunale des Villes solidaires</td><td>Saint-Pierre</td><td>6</td><td>Sud sauvage, viticulture, station balnéaire</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="font-size:0.8rem; color:#2d5a44; margin-top: 0.5rem;">
+            <i class="fas fa-info-circle"></i> Tous ces EPCI disposent de la Fiscalité Professionnelle Unique (FPU) et exercent des compétences obligatoires : développement économique, aménagement, gestion des déchets, etc.
+        </div>
+    </div>
+
+    <!-- CONTEXTE REGLEMENTAIRE : SAR -->
+    <div class="sar-note">
+        <div><i class="fas fa-gavel" style="font-size: 1.8rem; color:#3f7040;"></i></div>
+        <div>
+            <strong>📐 Hiérarchie normative & Schéma d’Aménagement Régional (SAR)</strong><br>
+            Les intercommunalités (CIREST, CINOR, TCO, CASUD, CIVIS) élaborent leurs documents d’urbanisme (PLUi, SCOT) en compatibilité avec le <strong>SAR</strong> de la Région Réunion. Le SAR fixe les grandes orientations en matière d’habitat, de protection des espaces agricoles et naturels, de mobilités et de prévention des risques. C’est le cadre stratégique qui garantit la cohérence territoriale à l’échelle de l’île.
+        </div>
+    </div>
+
+    <!-- CARTE SYMBOLIQUE ET LIENS -->
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin: 1.8rem 0 1rem;">
+        <div style="background: white; border-radius: 1.2rem; padding: 1rem; flex:1; min-width: 180px;">
+            <i class="fas fa-chart-simple" style="color:#2c7a4a;"></i> 
+            <span style="font-weight:600;">Chiffres clés CIREST :</span><br>
+            • 6 communes, ~130 000 habitants<br>
+            • 1ᵉʳ producteur d’énergie renouvelable (centrales hydrauliques)<br>
+            • Grandeur nature : Parc national de La Réunion
+        </div>
+        <div style="background: white; border-radius: 1.2rem; padding: 1rem; flex:1; min-width: 180px;">
+            <i class="fas fa-arrows-spin"></i> 
+            <span style="font-weight:600;">Coopération inter-EPCI :</span><br>
+            • SYDNE (déchets) : CIREST + CINOR<br>
+            • Syndicat mixte du Grand Port Maritime<br>
+            • Pôle métropolitain (coordination à l’échelle réunionnaise)
+        </div>
+        <div style="background: white; border-radius: 1.2rem; padding: 1rem; flex:1; min-width: 180px;">
+            <i class="fas fa-flag-checkered"></i> 
+            <span style="font-weight:600;">Gouvernance locale :</span><br>
+            Les présidents d’EPCI siègent au sein du conseil régional et participent aux comités de l’État pour l’aménagement du territoire.
+        </div>
+    </div>
+
+    <footer>
+        <i class="fas fa-globe"></i> La Réunion – Organisation intercommunale | Données actualisées (2025) · SAR révisé<br>
+        La CIREST, CINOR, TCO, CASUD, CIVIS : piliers de la coopération locale et du développement durable.
+    </footer>
+</div>
+</body>
+</html>
