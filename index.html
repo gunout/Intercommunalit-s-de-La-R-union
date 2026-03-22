@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>La Réunion - Intercommunalités & Élections 2026 | CIREST, CINOR, TCO, CASUD, CIVIS</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js CDN pour visualisation avancée -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #eef2f7 0%, #dcf0e5 100%);
+            color: #1a2e28;
+            padding: 2rem 1.5rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Badge élection */
+        .election-ribbon {
+            background: #c73f1e;
+            color: white;
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 60px;
+            margin-bottom: 1.8rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(199,63,30,0.3);
+            display: inline-block;
+            width: auto;
+            backdrop-filter: blur(2px);
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1b4d2b, #c94f1e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .hero .sub {
+            background: rgba(0,0,0,0.05);
+            backdrop-filter: blur(4px);
+            border-radius: 60px;
+            padding: 0.3rem 1.5rem;
+            display: inline-block;
+            margin-top: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* cartes dynamiques */
+        .countdown-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .countdown-card {
+            background: white;
+            border-radius: 2rem;
+            padding: 1rem 1.8rem;
+            box-shadow: 0 20px 30px -12px rgba(0,0,0,0.15);
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+            transition: transform 0.2s;
+            border-top: 6px solid #d9531e;
+        }
+        .countdown-card h3 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #2c5a3b;
+        }
+        .timer {
+            font-size: 2.2rem;
+            font-weight: 800;
+            font-family: monospace;
+            background: #fef3e0;
+            padding: 0.3rem 0.6rem;
+            border-radius: 2rem;
+            margin: 0.5rem 0;
+            color: #b6491a;
+        }
+        .election-badge {
+            background: #c73f1e10;
+            border-radius: 2rem;
+            padding: 0.3rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .diagram-card, .focus-section, .chart-card {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            transition: all 0.2s;
+        }
+
+        .hierarchy-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            border-left: 6px solid #d95b2a;
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* arbre hiérarchique avancé */
+        .org-tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .region-node {
+            background: linear-gradient(115deg, #216b3f, #1b4b2a);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 80px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .epci-flex {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.2rem;
+            margin: 1.5rem 0;
+        }
+        .epci-tile {
+            background: #fefbf5;
+            border-radius: 1.5rem;
+            width: 210px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+            border: 1px solid #dee9e2;
+            transition: all 0.2s;
+        }
+        .epci-tile.highlight {
+            border: 2px solid #e67e22;
+            background: #fff6e8;
+            transform: scale(1.02);
+        }
+        .epci-acronym {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: #263f2e;
+            display: inline-block;
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            color: white;
+        }
+        .next-election-date {
+            font-size: 0.7rem;
+            background: #fee2cf;
+            margin-top: 8px;
+            padding: 4px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .communes-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        .commune-badge {
+            background: #f0ede5;
+            border-radius: 40px;
+            padding: 0.3rem 0.9rem;
+            font-size: 0.8rem;
+        }
+
+        .competence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px,1fr));
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        /* tableau évolutif */
+        .election-table {
+            overflow-x: auto;
+        }
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            border-radius: 1.2rem;
+        }
+        .styled-table th {
+            background: #2c5e3f;
+            color: white;
+            padding: 12px;
+            font-weight: 600;
+        }
+        .styled-table td {
+            padding: 10px;
+            border-bottom: 1px solid #dde6df;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            border-top: 1px solid #bdd3c4;
+            padding-top: 1.2rem;
+        }
+
+        @media (max-width: 720px) {
+            .epci-tile { width: 160px; }
+            .timer { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div style="text-align: center;">
+        <span class="election-ribbon"><i class="fas fa-calendar-check"></i> Élections municipales et intercommunales 2026 · Renouvellement des conseils communautaires</span>
+    </div>
+    <div class="hero">
+        <h1><i class="fas fa-chalkboard-user"></i> Intercommunalités de La Réunion<br>Gouvernance & Échéances 2026</h1>
+        <div class="sub">CIREST · CINOR · TCO · CASUD · CIVIS — Scrutin les 15 et 22 mars 2026</div>
+    </div>
+
+    <!-- COMPTE À REBOURS DYNAMIQUE + DATES CLÉS -->
+    <div class="countdown-grid">
+        <div class="countdown-card"><h3><i class="fas fa-vote-yea"></i> 1er tour élections</h3><div class="timer" id="timerTour1">-- j -- h -- m</div><div class="election-badge">Dimanche 15 mars 2026</div></div>
+        <div class="countdown-card"><h3><i class="fas fa-chart-simple"></i> 2d tour (éventuel)</h3><div class="timer" id="timerTour2">-- j -- h -- m</div><div class="election-badge">Dimanche 22 mars 2026</div></div>
+        <div class="countdown-card"><h3><i class="fas fa-users"></i> Installation des conseils</h3><div class="timer" id="timerInstall">-- j -- h -- m</div><div class="election-badge">Entre le 23 mars et le 3 avril 2026</div></div>
+    </div>
+
+    <!-- DIAGRAMME HIÉRARCHIQUE AVEC CONTEXTE ÉLECTORAL -->
+    <div class="diagram-card">
+        <div class="hierarchy-title"><i class="fas fa-sitemap"></i> Hiérarchie des EPCI & mode de scrutin intercommunal</div>
+        <div class="org-tree">
+            <div class="region-node"><i class="fas fa-landmark"></i> Région Réunion (collectivité unique) · SAR</div>
+            <div style="margin: 12px 0;"><i class="fas fa-arrow-down"></i> 5 Communautés d'agglomération à fiscalité propre</div>
+            <div class="epci-flex">
+                <div class="epci-tile"><div class="epci-acronym">CINOR</div><div>Nord</div><div class="next-election-date"><i class="fas fa-gavel"></i> Renouvellement intégral 2026</div></div>
+                <div class="epci-tile highlight"><div class="epci-acronym">CIREST</div><div><strong>Est (siège St-Benoît)</strong></div><div class="next-election-date"><i class="fas fa-hourglass-half"></i> 6 communes · Élection des délégués communautaires</div></div>
+                <div class="epci-tile"><div class="epci-acronym">TCO</div><div>Côte Ouest</div><div class="next-election-date"><i class="fas fa-chart-line"></i> Scrutin proportionnel</div></div>
+                <div class="epci-tile"><div class="epci-acronym">CASUD</div><div>Sud</div><div class="next-election-date">Élections mars 2026</div></div>
+                <div class="epci-tile"><div class="epci-acronym">CIVIS</div><div>Saint-Pierre</div><div class="next-election-date">Nouveau conseil communautaire</div></div>
+            </div>
+            <div style="font-size:0.8rem; background: #e9f3ed; border-radius: 2rem; padding: 0.4rem 1rem; margin-top: 0.5rem;">
+                ⚖️ Les conseillers communautaires sont élus lors des élections municipales (scrutin fléché) · Sièges répartis par strate démographique
+            </div>
+        </div>
+    </div>
+
+    <!-- FOCUS CIREST + ENJEUX ÉLECTORAUX -->
+    <div class="focus-section">
+        <div class="hierarchy-title" style="border-left-color: #e67e22;"><i class="fas fa-water"></i> CIREST – Communauté intercommunale Réunion Est : échéances 2026</div>
+        <p><strong>La CIREST</strong> regroupe <strong>Saint-Benoît, Bras-Panon, La Plaine-des-Palmistes, Saint-André, Sainte-Rose, Salazie</strong>. Son conseil communautaire compte <strong>46 délégués</strong> (répartition selon la population). En mars 2026, l’ensemble des sièges sera renouvelé pour un mandat de 6 ans.</p>
+        <div class="communes-list">
+            <span class="commune-badge"><i class="fas fa-check-circle"></i> Saint-Benoît (siège)</span>
+            <span class="commune-badge">Bras-Panon</span>
+            <span class="commune-badge">La Plaine-des-Palmistes</span>
+            <span class="commune-badge">Saint-André</span>
+            <span class="commune-badge">Sainte-Rose</span>
+            <span class="commune-badge">Salazie</span>
+        </div>
+        <div><strong>🗳️ Modalités de vote spécifiques :</strong> Les électeurs voteront pour les listes municipales, et les conseillers municipaux élus siègeront de droit au conseil communautaire selon la répartition fixée par arrêté préfectoral. La future majorité déterminera le président de la CIREST et les vice-présidents.</div>
+        <div class="competence-grid" style="margin-top: 1rem;">
+            <div class="competence-item"><i class="fas fa-chart-line"></i> Développement économique & zone franche</div>
+            <div class="competence-item"><i class="fas fa-trash-alt"></i> SYDNE (déchets) – coopération avec CINOR</div>
+            <div class="competence-item"><i class="fas fa-bicycle"></i> Mobilités : TCSP Est, voies vertes</div>
+            <div class="competence-item"><i class="fas fa-leaf"></i> Transition énergétique (barrages hydrauliques)</div>
+        </div>
+        <div style="margin-top: 1rem; background: #f5e6d3; border-radius: 1rem; padding: 0.8rem;"><i class="fas fa-chart-simple"></i> <strong>Enjeux 2026-2032 :</strong> finalisation du PLUi, gestion du risque cyclonique, attractivité économique Est et préservation du patrimoine naturel (Parc national).</div>
+    </div>
+
+    <!-- TABLEAU AVANCÉ DES INTERCOMMUNALITÉS + DATES CLÉS -->
+    <div class="diagram-card">
+        <div class="hierarchy-title"><i class="fas fa-table"></i> Panorama électoral des 5 EPCI réunionnais (mandat 2026-2032)</div>
+        <div class="election-table">
+            <table class="styled-table">
+                <thead>
+                    <tr><th>EPCI</th><th>Siège</th><th>Nombre de communes</th><th>Nb conseillers communautaires</th><th>Prochain président élu</th><th>Date d'installation</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>CINOR</strong></td><td>Saint-Denis</td><td>3</td><td>52</td><td>Élection mars/avril 2026</td><td>Entre le 23/03 et 10/04</td></tr>
+                    <tr style="background:#fff5ea;"><td><strong>CIREST</strong></td><td>Saint-Benoît</td><td>6</td><td>46</td><td>Renouvellement complet</td><td>Semaine suivant le 2nd tour</td></tr>
+                    <tr><td><strong>TCO</strong></td><td>Le Port</td><td>5</td><td>64</td><td>Nouvelle gouvernance</td><td>Installation avant le 15 avril</td></tr>
+                    <tr><td><strong>CASUD</strong></td><td>Le Tampon</td><td>4</td><td>50</td><td>Scrutin majoritaire</td><td>Fin mars 2026</td></tr>
+                    <tr><td><strong>CIVIS</strong></td><td>Saint-Pierre</td><td>6</td><td>68</td><td>À déterminer</td><td>Conseil d'installation légal</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="font-size:0.8rem; margin-top: 1rem;"><i class="fas fa-gavel"></i> Depuis la loi NOTRe, les présidents d’EPCI sont élus par les conseillers communautaires dans les 15 jours suivant l’installation des conseils municipaux.</div>
+    </div>
+
+    <!-- GRAPHIQUE AVANCÉ : PONDÉRATION DÉMOGRAPHIQUE & SIÈGES (Chart.js) -->
+    <div class="chart-card">
+        <div class="hierarchy-title"><i class="fas fa-chart-pie"></i> Répartition des sièges communautaires par intercommunalité (2026)</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 2rem; align-items: center;">
+            <div style="flex: 1; min-width: 200px;"><canvas id="siegesChart" width="400" height="300" style="max-width:100%; height:auto;"></canvas></div>
+            <div style="flex:1; font-size:0.9rem;">
+                <i class="fas fa-chart-simple"></i> Le nombre de délégués communautaires est fixé en fonction de la population des communes membres. <br>
+                🔹 <strong>CIREST</strong> : 46 sièges — Saint-André et Saint-Benoît concentrent la majorité des représentants.<br>
+                🔹 La prochaine mandature devra élire un nouveau président après les scrutins de mars 2026.
+            </div>
+        </div>
+    </div>
+
+    <!-- CALENDRIER ÉLECTORAL DÉTAILLÉ + COMPTE À REBOURS INTERACTIF -->
+    <div class="diagram-card">
+        <div class="hierarchy-title"><i class="fas fa-calendar-alt"></i> Calendrier des prochaines échéances intercommunales</div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div><i class="fas fa-envelope-open-text"></i> <strong>Dépôt des candidatures</strong> : du 10 au 13 février 2026 (préfecture)</div>
+            <div><i class="fas fa-bullhorn"></i> <strong>Campagne officielle</strong> : 28 février → 13 mars 2026</div>
+            <div><i class="fas fa-check-double"></i> <strong>1er tour</strong> : 15 mars 2026 — seuil de 25% des inscrits pour être élu dès le 1er tour (municipales).</div>
+            <div><i class="fas fa-repeat"></i> <strong>2d tour</strong> : 22 mars 2026 pour les communes sans majorité absolue.</div>
+            <div><i class="fas fa-users-between"></i> <strong>Constitution des conseils communautaires</strong> : entre le 23 et le 30 mars 2026.</div>
+            <div><i class="fas fa-hand-sparkles"></i> <strong>Élection des présidents d’intercommunalité</strong> : au plus tard le 10 avril 2026.</div>
+        </div>
+        <hr style="margin: 1rem 0;">
+        <div style="background:#eef2e6; border-radius: 1.2rem; padding: 1rem;">
+            <i class="fas fa-gavel"></i> <strong>Impact de l’élection sur la CIREST</strong> : La nouvelle équipe devra piloter le Schéma de Cohérence Territoriale (SCOT) Est, la politique de l’eau et la gestion des déchets. L’enjeu de la majorité politique conditionne les délégations de compétences.
+        </div>
+    </div>
+
+    <!-- NOUVEAUTÉS LOI 3DS ET PARTICIPATION -->
+    <div class="focus-section" style="background: linear-gradient(105deg, #faf3e8, #fff5ec);">
+        <div class="hierarchy-title"><i class="fas fa-balance-scale"></i> Évolutions législatives & participation citoyenne</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+            <div style="flex:1;"><i class="fas fa-check-circle" style="color:#2a7f49;"></i> Loi 3DS (2022) : renforcement des compétences intercommunales et démocratie participative.<br><br>
+            <i class="fas fa-chart-line"></i> Depuis 2026, les conseils communautaires devront publier un rapport annuel d’activité incluant la prospective électorale.
+            </div>
+            <div style="flex:1;"><i class="fas fa-vote-yea"></i> <strong>Nouveautés pour les élections 2026</strong> : simplification des modalités de parrainage et obligation de transparence des listes. La CIREST, comme les autres EPCI, verra sa gouvernance directement liée aux résultats municipaux.<br>
+            💡 <em>Les citoyens peuvent assister aux conseils communautaires, un outil de contrôle démocratique.</em>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <i class="fas fa-chart-line"></i> Données institutionnelles – Préfecture de La Réunion / Code général des collectivités territoriales · Mise à jour : Mars 2026 (échéances à venir) <br>
+        Les dates des élections sont fixées par décret : 15 et 22 mars 2026. Installation des nouveaux exécutifs intercommunaux dans les semaines suivantes.
+    </footer>
+</div>
+
+<script>
+    // COMPTE À REBOURS DYNAMIQUE (dates précises)
+    function getTimeRemaining(targetDate) {
+        const now = new Date();
+        const difference = targetDate - now;
+        if(difference <= 0) return { total: 0, days: 0, hours: 0, minutes: 0 };
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (86400000)) / (3600000));
+        const minutes = Math.floor((difference % 3600000) / 60000);
+        return { total: difference, days, hours, minutes };
+    }
+
+    function updateTimer() {
+        // 1er tour : 15 mars 2026 à 08h00 (heure locale Réunion)
+        const tour1 = new Date(2026, 2, 15, 8, 0, 0);
+        // 2d tour : 22 mars 2026
+        const tour2 = new Date(2026, 2, 22, 8, 0, 0);
+        // Installation indicative : 28 mars 2026 (première réunion possible)
+        const install = new Date(2026, 2, 28, 10, 0, 0);
+
+        const t1 = getTimeRemaining(tour1);
+        const t2 = getTimeRemaining(tour2);
+        const ti = getTimeRemaining(install);
+
+        document.getElementById('timerTour1').innerHTML = `${t1.days}j ${t1.hours}h ${t1.minutes}m`;
+        document.getElementById('timerTour2').innerHTML = `${t2.days}j ${t2.hours}h ${t2.minutes}m`;
+        document.getElementById('timerInstall').innerHTML = `${ti.days}j ${ti.hours}h ${ti.minutes}m`;
+    }
+    updateTimer();
+    setInterval(updateTimer, 60000);
+
+    // GRAPHIQUE AVANCÉ CHART.JS (répartition sièges)
+    const ctx = document.getElementById('siegesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['CIREST', 'CINOR', 'TCO', 'CASUD', 'CIVIS'],
+            datasets: [{
+                label: 'Nombre de conseillers communautaires (2026)',
+                data: [46, 52, 64, 50, 68],
+                backgroundColor: ['#e67e22', '#2c7a4a', '#3498db', '#e7b416', '#9b59b6'],
+                borderRadius: 12,
+                barPercentage: 0.65
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: { callbacks: { label: (ctx) => `${ctx.raw} délégués` } }
+            },
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Sièges au conseil communautaire' } },
+                x: { title: { display: true, text: 'Intercommunalités' } }
+            }
+        }
+    });
+</script>
+
+<!-- Information supplémentaire : élection des présidents -->
+<script>
+    // Dynamisme supplémentaire: tooltip élections
+    console.log("Page avancée sur les élections intercommunales 2026 - CIREST / Réunion");
+</script>
+</body>
+</html>
